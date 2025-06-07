@@ -1,4 +1,4 @@
-const Booking = require('../models/booking');
+const Booking = require('../model/Booking');
 
 const createBooking = async (req, res) => {
     const { propertyId, userId, startDate, endDate, totalAmount } = req.body;

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const propertySchema = new mongoose.Schema({
+const investmentSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
@@ -48,8 +48,10 @@ const propertySchema = new mongoose.Schema({
         default: Date.now
     }
 });
-const Property = mongoose.model('Property', propertySchema);
-module.exports = Property;
+const Investment = mongoose.model('Investment', investmentSchema);
+module.exports = Investment;
+
+
 // This code defines a Mongoose schema for a Property model in a Node.js application.
 // The schema includes fields for title, description, goalAmount, currentAmount, expectedROI, investors, status, type, images, and createdAt timestamp.
 // The title, description, goalAmount, expectedROI, type, and images fields are required.

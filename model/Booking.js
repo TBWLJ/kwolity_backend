@@ -33,3 +33,5 @@ const bookingSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+const Booking = mongoose.model('Booking', bookingSchema);
+module.exports = Booking;
