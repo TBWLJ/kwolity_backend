@@ -1,24 +1,32 @@
 const router = require('express').Router();
-const { verifyToken, isAdmin } = require('../middleware/auth');
+const { verifyToken, verifyTokenAndAdmin } = require('../middleware/verifyToken')
 const {createInvestment, getAllInvestments, getInvestmentById, updateInvestment, deleteInvestment, getInvestmentsByUser, getInvestmentCount} = require('../controller/investmentController');
 
 // Investment creation route (requires admin authentication)
-router.post('/', verifyToken, isAdmin, createInvestment);
+router.post('/', verifyTokenAndAdmin, createInvestment);
+
 // Get all investments route
 router.get('/', getAllInvestments);
+
 // Get investment by ID route
 router.get('/:id', getInvestmentById);
+
 // Update investment by ID route (requires admin authentication)
-router.put('/:id', verifyToken, isAdmin, updateInvestment);
+router.put('/:id', verifyTokenAndAdmin, updateInvestment);
+
 // Delete investment by ID route (requires admin authentication)
-router.delete('/:id', verifyToken, isAdmin, deleteInvestment);
+router.delete('/:id', verifyTokenAndAdmin, deleteInvestment);
+
 // Get investments by user route
 router.get('/user/:userId', verifyToken, getInvestmentsByUser);
+
 // Get investment count route
 router.get('/count', getInvestmentCount);
 
 // Export the router
 module.exports = router;
+
+
 // This code defines the investment routes for creating, retrieving, updating, and deleting investments.
 // It uses Express.js to create a router and applies middleware for authentication and authorization.
 // The routes are protected by authentication and admin checks where necessary.

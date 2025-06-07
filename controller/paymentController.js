@@ -1,8 +1,7 @@
 const Payment = require('../models/paymentModel');
-const { verifyToken, isAdmin } = require('../middleware/auth');
 
 
-exports.createPayment = async (req, res) => {
+const createPayment = async (req, res) => {
     const { bookingId, amount, paymentMethod } = req.body;
 
     try {
@@ -22,7 +21,7 @@ exports.createPayment = async (req, res) => {
     }
 };
 
-exports.verifyPayment = async (req, res) => {
+const verifyPayment = async (req, res) => {
     const { paymentId } = req.body;
     try {
         // Verify payment by ID
@@ -41,7 +40,7 @@ exports.verifyPayment = async (req, res) => {
 };
 
 
-exports.getAllPayments = async (req, res) => {
+const getAllPayments = async (req, res) => {
     try {
         // Fetch all payments from the database
         const payments = await Payment.find().populate('bookingId');
@@ -51,7 +50,7 @@ exports.getAllPayments = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-exports.getPaymentById = async (req, res) => {
+const getPaymentById = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -66,7 +65,7 @@ exports.getPaymentById = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-exports.updatePayment = async (req, res) => {
+const updatePayment = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
@@ -82,7 +81,7 @@ exports.updatePayment = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-exports.deletePayment = async (req, res) => {
+const deletePayment = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -97,7 +96,7 @@ exports.deletePayment = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-exports.getPaymentsByBookingId = async (req, res) => {
+const getPaymentsByBookingId = async (req, res) => {
     const { bookingId } = req.params;
 
     try {
@@ -112,7 +111,7 @@ exports.getPaymentsByBookingId = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-exports.getPaymentsByUserId = async (req, res) => {
+const getPaymentsByUserId = async (req, res) => {
     const userId = req.user.id; // Assuming user ID is stored in req.user after authentication
 
     try {

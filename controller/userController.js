@@ -1,9 +1,10 @@
 const User = require('../model/User');
-const bcrypt = require('bcryptjs');
+// const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
 
 
-exports.register = async (req, res) => {
+const register = async (req, res) => {
     const { name, email, password, role, phone } = req.body;
 
     try {
@@ -35,7 +36,7 @@ exports.register = async (req, res) => {
     }
 }
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -75,12 +76,12 @@ exports.login = async (req, res) => {
     }
 }
 
-exports.logout = (req, res) => {
+const logout = (req, res) => {
     res.clearCookie('token');
     res.status(200).json({ message: 'Logout successful' });
 }
 
-exports.getUserProfile = async (req, res) => {
+const getUserProfile = async (req, res) => {
     const userId = req.user.id; // Assuming user ID is stored in req.user after authentication
 
     try {
@@ -95,6 +96,14 @@ exports.getUserProfile = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+
+module.exports = {
+    register,
+    login,
+    logout,
+    getUserProfile
+};
 
 // This code defines user-related operations such as registration, login, logout, and fetching user profiles.
 // It uses Express.js for routing, Mongoose for MongoDB interactions, and bcrypt for password hashing.
@@ -111,18 +120,7 @@ exports.getUserProfile = async (req, res) => {
 // to handle user-related operations like registration, login, and profile management.
 // The User model can be used to create, read, update, and delete user documents in the MongoDB database.
 // This code is essential for building user authentication and management features in a web application.
-// It ensures that user data is stored in a structured way, making it easier to query and manipulate.
 // The use of Mongoose allows for validation and type checking, ensuring data integrity.
 // This code is typically placed in a separate file (e.g., controller/user.js) to keep the code organized.
 // It can be used in conjunction with other parts of the application, such as routes and middleware,
 // to handle user-related operations like registration, login, and profile management.
-// The User model can be used to create, read, update, and delete user documents in the MongoDB database.
-// This code is essential for building user authentication and management features in a web application.
-// It ensures that user data is stored in a structured way, making it easier to query and manipulate.
-
-module.exports = {
-    register,
-    login,
-    logout,
-    getUserProfile
-};

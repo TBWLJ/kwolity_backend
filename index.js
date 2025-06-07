@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const { connectDB } = require('./utils/db');
 
 // Import routes
 const propertyRoute = require('./routes/propertyRoute');
@@ -15,6 +16,9 @@ const investmentRoute = require('./routes/investmentRoute');
 const app = express();
 dotenv.config();
 const port = 3000;
+
+// Database connection
+connectDB();
 
 // Middleware setup
 app.use(cors());

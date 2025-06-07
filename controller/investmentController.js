@@ -1,6 +1,6 @@
 const Investment = require('../model/Investment');
 
-exports.createInvestment = async (req, res) => {
+const createInvestment = async (req, res) => {
     const { title, description, goalAmount, expectedROI, type, images } = req.body;
 
     try {
@@ -22,7 +22,7 @@ exports.createInvestment = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getAllInvestments = async (req, res) => {
+const getAllInvestments = async (req, res) => {
     try {
         // Fetch all investments from the database
         const investments = await Investment.find();
@@ -32,7 +32,7 @@ exports.getAllInvestments = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getInvestmentById = async (req, res) => {
+const getInvestmentById = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -48,7 +48,7 @@ exports.getInvestmentById = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.updateInvestment = async (req, res) => {
+const updateInvestment = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
@@ -64,7 +64,7 @@ exports.updateInvestment = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.deleteInvestment = async (req, res) => {
+const deleteInvestment = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -79,7 +79,7 @@ exports.deleteInvestment = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.investInProperty = async (req, res) => {
+const investInProperty = async (req, res) => {
     const { id } = req.params;
     const { userId, amount } = req.body;
 
@@ -112,7 +112,7 @@ exports.investInProperty = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getInvestmentsByUser = async (req, res) => {
+const getInvestmentsByUser = async (req, res) => {
     const userId = req.user.id; // Assuming user ID is stored in req.user after authentication
 
     try {

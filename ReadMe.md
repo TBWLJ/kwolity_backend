@@ -44,7 +44,7 @@ userRoute.js
 
 1. Clone the repository:
     ```sh
-    git clone [https://github.com/TBWLJ/kwolity_backend.git](https://github.com/TBWLJ/kwolity_backend.git)
+    git clone [https://github.com/TBWLJ/kwolity_backend.git]
     cd kwolity_backend
     ```
 
@@ -56,6 +56,21 @@ userRoute.js
 3. Create a `.env` file in the root directory and set your environment variables:
     ```
     JWT_SECRET=your_jwt_secret
+    ```
+    ```
+    MONGODB_URL=database_url
+    ```
+    ```
+    CLOUDINARY_CLOUD_NAME=your_cloudinary_name
+    ```
+    ```
+    CLOUDINARY_API_KEY=your_cloudinary_apiKey
+    ```
+    ```
+    CLOUDINARY_API_SECRET=your_cloudinary_apiSecret
+    ```
+    ```
+    JWT_SEC=your_signToken
     ```
 
 4. Start the server:
@@ -115,5 +130,5 @@ ISC
 
 ## Author
 
-Taiwo Ayomide
+Taiwo Ayomide (TBWLJ)
 

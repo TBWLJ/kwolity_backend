@@ -1,7 +1,6 @@
 const Booking = require('../models/booking');
-const { verifyToken, isAdmin } = require('../middleware/auth');
 
-exports.createBooking = async (req, res) => {
+const createBooking = async (req, res) => {
     const { propertyId, userId, startDate, endDate, totalAmount } = req.body;
 
     try {
@@ -22,7 +21,7 @@ exports.createBooking = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getAllBookings = async (req, res) => {
+const getAllBookings = async (req, res) => {
     try {
         // Fetch all bookings from the database
         const bookings = await Booking.find().populate('propertyId').populate('userId');
@@ -32,7 +31,7 @@ exports.getAllBookings = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getBookingById = async (req, res) => {
+const getBookingById = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -48,7 +47,7 @@ exports.getBookingById = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.updateBooking = async (req, res) => {
+const updateBooking = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
@@ -64,7 +63,7 @@ exports.updateBooking = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.deleteBooking = async (req, res) => {
+const deleteBooking = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -79,7 +78,7 @@ exports.deleteBooking = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getBookingsByUser = async (req, res) => {
+const getBookingsByUser = async (req, res) => {
     const userId = req.user.id; // Assuming user ID is stored in req.user after authentication
 
     try {
@@ -90,4 +89,13 @@ exports.getBookingsByUser = async (req, res) => {
         console.error('Error fetching user bookings:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
+}
+
+module.exports = {
+    createBooking,
+    getAllBookings,
+    getBookingById,
+    updateBooking,
+    deleteBooking,
+    getBookingsByUser
 }

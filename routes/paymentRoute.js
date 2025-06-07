@@ -1,20 +1,26 @@
 const router = require('express').Router();
-const { verifyToken, isAdmin } = require('../middleware/auth');
+const { verifyToken, verifyTokenAndAdmin } = require('../middleware/verifyToken');
 const {createPayment, getAllPayments, getPaymentById, updatePayment, deletePayment} = require('../controller/paymentController');
 
 // Payment creation route (requires authentication)
 router.post('/', verifyToken, createPayment);
+
 // Get all payments route (requires admin authentication)
-router.get('/', verifyToken, isAdmin, getAllPayments);
+router.get('/', verifyTokenAndAdmin, getAllPayments);
+
 // Get payment by ID route (requires authentication)
 router.get('/:id', verifyToken, getPaymentById);
+
 // Update payment by ID route (requires admin authentication)
-router.put('/:id', verifyToken, isAdmin, updatePayment);
+router.put('/:id', verifyTokenAndAdmin, updatePayment);
+
 // Delete payment by ID route (requires admin authentication)
-router.delete('/:id', verifyToken, isAdmin, deletePayment);
+router.delete('/:id', verifyTokenAndAdmin, deletePayment);
 
 // Export the router
 module.exports = router;
+
+
 // This code defines the payment routes for creating, retrieving, updating, and deleting payments.
 // It uses Express.js to create a router and applies middleware for authentication and authorization.
 // The routes are protected by authentication and admin checks where necessary.

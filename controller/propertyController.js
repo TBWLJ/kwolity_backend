@@ -1,8 +1,6 @@
-const router = require('express').Router();
 const Property = require('../model/Property');
-const { verifyToken, isAdmin } = require('../middleware/auth');
 
-exports.createProperty = async (req, res) => {
+const createProperty = async (req, res) => {
     const { title, description, type, status, images, price, location } = req.body;
 
     try {
@@ -25,7 +23,8 @@ exports.createProperty = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getAllProperties = async (req, res) => {
+
+const getAllProperties = async (req, res) => {
     try {
         // Fetch all properties from the database
         const properties = await Property.find();
@@ -35,7 +34,7 @@ exports.getAllProperties = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getPropertyById = async (req, res) => {
+const getPropertyById = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -50,7 +49,8 @@ exports.getPropertyById = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.updateProperty = async (req, res) => {
+
+const updateProperty = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
@@ -66,7 +66,8 @@ exports.updateProperty = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.deleteProperty = async (req, res) => {
+
+const deleteProperty = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -81,7 +82,8 @@ exports.deleteProperty = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getPropertiesByType = async (req, res) => {
+
+const getPropertiesByType = async (req, res) => {
     const { type } = req.params;
 
     try {
@@ -96,7 +98,9 @@ exports.getPropertiesByType = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getPropertiesByStatus = async (req, res) => {
+
+
+const getPropertiesByStatus = async (req, res) => {
     const { status } = req.params;
 
     try {
@@ -111,7 +115,7 @@ exports.getPropertiesByStatus = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getPropertiesByLocation = async (req, res) => {
+const getPropertiesByLocation = async (req, res) => {
     const { location } = req.params;
 
     try {
@@ -126,7 +130,7 @@ exports.getPropertiesByLocation = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getPropertiesByPriceRange = async (req, res) => {
+const getPropertiesByPriceRange = async (req, res) => {
     const { minPrice, maxPrice } = req.query;
 
     try {
@@ -143,7 +147,7 @@ exports.getPropertiesByPriceRange = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getPropertiesByTitle = async (req, res) => {
+const getPropertiesByTitle = async (req, res) => {
     const { title } = req.params;
 
     try {
@@ -158,7 +162,7 @@ exports.getPropertiesByTitle = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getPropertiesByUser = async (req, res) => {
+const getPropertiesByUser = async (req, res) => {
     const userId = req.user.id; // Assuming user ID is stored in req.user after authentication
 
     try {
@@ -173,7 +177,7 @@ exports.getPropertiesByUser = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-exports.getPropertyCount = async (req, res) => {
+const getPropertyCount = async (req, res) => {
     try {
         // Count total properties
         const count = await Property.countDocuments();

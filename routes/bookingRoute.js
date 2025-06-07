@@ -1,17 +1,23 @@
 const router = require('express').Router();
-const { verifyToken, isAdmin } = require('../middleware/auth');
 const {createBooking, getAllBookings, getBookingById, updateBooking, deleteBooking} = require('../controller/bookingController');
+const { verifyToken, verifyTokenAndAdmin } = require('../middleware/verifyToken')
 
 // Create a new booking (requires authentication)
 router.post('/', verifyToken, createBooking);
+
 // Get all bookings (requires admin authentication)
-router.get('/', verifyToken, isAdmin, getAllBookings);
+router.get('/', verifyTokenAndAdmin, getAllBookings);
+
 // Get booking by ID (requires authentication)
 router.get('/:id', verifyToken, getBookingById);
+
 // Update booking by ID (requires admin authentication)
-router.put('/:id', verifyToken, isAdmin, updateBooking);
+router.put('/:id', verifyTokenAndAdmin, updateBooking);
+
 // Delete booking by ID (requires admin authentication)
-router.delete('/:id', verifyToken, isAdmin, deleteBooking);
+router.delete('/:id', verifyTokenAndAdmin, deleteBooking);
+
+
 // Export the router
 module.exports = router;
 
