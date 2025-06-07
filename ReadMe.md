@@ -1,4 +1,4 @@
-# Kwolity Backend
+# Kwolity Groups Real Estate
 
 This is the backend API for Kwolity Group, a real estate and investment platform. The backend is built with Node.js, Express, and MongoDB (via Mongoose), and provides RESTful endpoints for managing users, properties, investments, bookings, and payments.
 
@@ -44,7 +44,7 @@ userRoute.js
 
 1. Clone the repository:
     ```sh
-    git clone <repo-url>
+    git clone [https://github.com/TBWLJ/kwolity_backend.git](https://github.com/TBWLJ/kwolity_backend.git)
     cd kwolity_backend
     ```
 
