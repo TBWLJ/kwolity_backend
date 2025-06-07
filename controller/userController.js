@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
 
 
-const register = async (req, res) => {
+const registerUser = async (req, res) => {
     const { name, email, password, role, phone } = req.body;
 
     try {
@@ -36,7 +36,7 @@ const register = async (req, res) => {
     }
 }
 
-const login = async (req, res) => {
+const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -97,12 +97,38 @@ const getUserProfile = async (req, res) => {
     }
 }
 
+// update user profile
+const updateUserProfile = async (req, res) => {
+    const userId = req.user.id; // Assuming user ID is stored in req.user after authentication
+    const { name, email, phone } = req.body;
+    try {
+        // Find the user by ID
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update user details
+        user.name = name || user.name;
+        user.email = email || user.email;
+        user.phone = phone || user.phone;
+
+        // Save the updated user
+        await user.save();
+        res.status(200).json({ message: 'User profile updated successfully', user });
+    }
+    catch (error) {
+        console.error('Error updating user profile:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
 
 module.exports = {
-    register,
-    login,
+    registerUser,
+    loginUser,
     logout,
-    getUserProfile
+    getUserProfile,
+    updateUserProfile
 };
 
 // This code defines user-related operations such as registration, login, logout, and fetching user profiles.
