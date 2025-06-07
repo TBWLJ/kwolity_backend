@@ -1,0 +1,138 @@
+const Investment = require('../model/Investment');
+
+exports.createInvestment = async (req, res) => {
+    const { title, description, goalAmount, expectedROI, type, images } = req.body;
+
+    try {
+        // Create a new investment
+        const newInvestment = new Investment({
+            title,
+            description,
+            goalAmount,
+            expectedROI,
+            type,
+            images
+        });
+
+        // Save the investment to the database
+        await newInvestment.save();
+        res.status(201).json({ message: 'Investment created successfully', investment: newInvestment });
+    } catch (error) {
+        console.error('Error creating investment:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getAllInvestments = async (req, res) => {
+    try {
+        // Fetch all investments from the database
+        const investments = await Investment.find();
+        res.status(200).json(investments);
+    } catch (error) {
+        console.error('Error fetching investments:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getInvestmentById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Fetch investment by ID
+        const investment = await Investment.findById(id);
+        if (!investment) {
+            return res.status(404).json({ message: 'Investment not found' });
+        }
+        res.status(200).json(investment);
+    }
+    catch (error) {
+        console.error('Error fetching investment:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.updateInvestment = async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+
+    try {
+        // Update investment by ID
+        const updatedInvestment = await Investment.findByIdAndUpdate(id, updates, { new: true });
+        if (!updatedInvestment) {
+            return res.status(404).json({ message: 'Investment not found' });
+        }
+        res.status(200).json({ message: 'Investment updated successfully', investment: updatedInvestment });
+    } catch (error) {
+        console.error('Error updating investment:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.deleteInvestment = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Delete investment by ID
+        const deletedInvestment = await Investment.findByIdAndDelete(id);
+        if (!deletedInvestment) {
+            return res.status(404).json({ message: 'Investment not found' });
+        }
+        res.status(200).json({ message: 'Investment deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting investment:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.investInProperty = async (req, res) => {
+    const { id } = req.params;
+    const { userId, amount } = req.body;
+
+    try {
+        // Find the investment by ID
+        const investment = await Investment.findById(id);
+        if (!investment) {
+            return res.status(404).json({ message: 'Investment not found' });
+        }
+
+        // Check if the investment is still open for funding
+        if (investment.status !== 'investing') {
+            return res.status(400).json({ message: 'Investment is not open for funding' });
+        }
+
+        // Update the current amount and add the investor
+        investment.currentAmount += amount;
+        investment.investors.push(userId);
+
+        // Check if the goal amount has been reached
+        if (investment.currentAmount >= investment.goalAmount) {
+            investment.status = 'funded';
+        }
+
+        // Save the updated investment
+        await investment.save();
+        res.status(200).json({ message: 'Investment successful', investment });
+    } catch (error) {
+        console.error('Error investing in property:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getInvestmentsByUser = async (req, res) => {
+    const userId = req.user.id; // Assuming user ID is stored in req.user after authentication
+
+    try {
+        // Fetch investments made by the user
+        const investments = await Investment.find({ investors: userId });
+        res.status(200).json(investments);
+    } catch (error) {
+        console.error('Error fetching user investments:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+// Export the router
+
+module.exports = {
+    createInvestment,
+    getAllInvestments,
+    getInvestmentById,
+    updateInvestment,
+    deleteInvestment,
+    investInProperty,
+    getInvestmentsByUser
+};

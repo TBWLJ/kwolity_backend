@@ -1,0 +1,210 @@
+const router = require('express').Router();
+const Property = require('../model/Property');
+const { verifyToken, isAdmin } = require('../middleware/auth');
+
+exports.createProperty = async (req, res) => {
+    const { title, description, type, status, images, price, location } = req.body;
+
+    try {
+        // Create a new property
+        const newProperty = new Property({
+            title,
+            description,
+            type,
+            status,
+            images,
+            price,
+            location
+        });
+
+        // Save the property to the database
+        await newProperty.save();
+        res.status(201).json({ message: 'Property created successfully', property: newProperty });
+    } catch (error) {
+        console.error('Error creating property:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getAllProperties = async (req, res) => {
+    try {
+        // Fetch all properties from the database
+        const properties = await Property.find();
+        res.status(200).json(properties);
+    } catch (error) {
+        console.error('Error fetching properties:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getPropertyById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Fetch property by ID
+        const property = await Property.findById(id);
+        if (!property) {
+            return res.status(404).json({ message: 'Property not found' });
+        }
+        res.status(200).json(property);
+    } catch (error) {
+        console.error('Error fetching property:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.updateProperty = async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+
+    try {
+        // Update property by ID
+        const updatedProperty = await Property.findByIdAndUpdate(id, updates, { new: true });
+        if (!updatedProperty) {
+            return res.status(404).json({ message: 'Property not found' });
+        }
+        res.status(200).json({ message: 'Property updated successfully', property: updatedProperty });
+    } catch (error) {
+        console.error('Error updating property:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.deleteProperty = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Delete property by ID
+        const deletedProperty = await Property.findByIdAndDelete(id);
+        if (!deletedProperty) {
+            return res.status(404).json({ message: 'Property not found' });
+        }
+        res.status(200).json({ message: 'Property deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting property:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getPropertiesByType = async (req, res) => {
+    const { type } = req.params;
+
+    try {
+        // Fetch properties by type
+        const properties = await Property.find({ type });
+        if (properties.length === 0) {
+            return res.status(404).json({ message: 'No properties found for this type' });
+        }
+        res.status(200).json(properties);
+    } catch (error) {
+        console.error('Error fetching properties by type:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getPropertiesByStatus = async (req, res) => {
+    const { status } = req.params;
+
+    try {
+        // Fetch properties by status
+        const properties = await Property.find({ status });
+        if (properties.length === 0) {
+            return res.status(404).json({ message: 'No properties found for this status' });
+        }
+        res.status(200).json(properties);
+    } catch (error) {
+        console.error('Error fetching properties by status:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getPropertiesByLocation = async (req, res) => {
+    const { location } = req.params;
+
+    try {
+        // Fetch properties by location
+        const properties = await Property.find({ location: new RegExp(location, 'i') }); // Case-insensitive search
+        if (properties.length === 0) {
+            return res.status(404).json({ message: 'No properties found for this location' });
+        }
+        res.status(200).json(properties);
+    } catch (error) {
+        console.error('Error fetching properties by location:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getPropertiesByPriceRange = async (req, res) => {
+    const { minPrice, maxPrice } = req.query;
+
+    try {
+        // Fetch properties within a price range
+        const properties = await Property.find({
+            price: { $gte: minPrice, $lte: maxPrice }
+        });
+        if (properties.length === 0) {
+            return res.status(404).json({ message: 'No properties found in this price range' });
+        }
+        res.status(200).json(properties);
+    } catch (error) {
+        console.error('Error fetching properties by price range:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getPropertiesByTitle = async (req, res) => {
+    const { title } = req.params;
+
+    try {
+        // Fetch properties by title
+        const properties = await Property.find({ title: new RegExp(title, 'i') }); // Case-insensitive search
+        if (properties.length === 0) {
+            return res.status(404).json({ message: 'No properties found with this title' });
+        }
+        res.status(200).json(properties);
+    } catch (error) {
+        console.error('Error fetching properties by title:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getPropertiesByUser = async (req, res) => {
+    const userId = req.user.id; // Assuming user ID is stored in req.user after authentication
+
+    try {
+        // Fetch properties created by the user
+        const properties = await Property.find({ createdBy: userId });
+        if (properties.length === 0) {
+            return res.status(404).json({ message: 'No properties found for this user' });
+        }
+        res.status(200).json(properties);
+    } catch (error) {
+        console.error('Error fetching properties by user:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+exports.getPropertyCount = async (req, res) => {
+    try {
+        // Count total properties
+        const count = await Property.countDocuments();
+        res.status(200).json({ count });
+    } catch (error) {
+        console.error('Error counting properties:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+// give comments on the code
+// This code defines a set of controller functions for managing properties in a real estate application.
+// Each function handles a specific operation related to properties, such as creating, fetching, updating, and deleting properties.
+// The functions interact with a MongoDB database using Mongoose, a popular ODM (Object Data Modeling) library for Node.js.
+// The code includes error handling to ensure that appropriate responses are sent back to the client in case of errors.
+// The functions are designed to be used in an Express.js application, where they can be mapped to specific routes.
+// The code also includes functions to filter properties based on various criteria such as type, status, location, price range, and title.
+// The `getPropertiesByUser` function retrieves properties created by the authenticated user, assuming user information is stored in `req.user`.
+// The `getPropertyCount` function provides a count of total properties in the database.
+// This modular approach allows for better organization and maintainability of the codebase, making it easier to manage property-related operations in the application.
+module.exports = {
+    createProperty,
+    getAllProperties,
+    getPropertyById,
+    updateProperty,
+    deleteProperty,
+    getPropertiesByType,
+    getPropertiesByStatus,
+    getPropertiesByLocation,
+    getPropertiesByPriceRange,
+    getPropertiesByTitle,
+    getPropertiesByUser,
+    getPropertyCount
+};
