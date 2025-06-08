@@ -125,6 +125,18 @@ const getInvestmentsByUser = async (req, res) => {
     }
 }
 
+//  get investment count
+const getInvestmentCount = async (req, res) => {
+    try {
+        // Count the total number of investments
+        const count = await Investment.countDocuments();
+        res.status(200).json({ count });
+    } catch (error) {
+        console.error('Error fetching investment count:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
 // Export the router
 
 module.exports = {
@@ -134,5 +146,6 @@ module.exports = {
     updateInvestment,
     deleteInvestment,
     investInProperty,
-    getInvestmentsByUser
+    getInvestmentsByUser,
+    getInvestmentCount
 };
