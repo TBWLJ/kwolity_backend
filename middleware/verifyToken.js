@@ -1,78 +1,95 @@
-// Middleware: Basic token verification
-const jwt = require("jsonwebtoken");
 const User = require('../model/User');
 
-// Reusable helper
-const getUserFromToken = async (token) => {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-    if (!user) throw new Error('User not found');
-    return user;
-};
-
-// Middleware to verify token
+// Middleware: Verifies if user is logged in via session
 const verifyToken = async (req, res, next) => {
-    try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({
-                success: false,
-                message: 'No authentication token provided'
-            });
-        }
+  try {
+    const userId = req.session.userId;
 
-        const token = authHeader.split(' ')[1];
-        req.user = await getUserFromToken(token);
-        next();
-    } catch (error) {
-        console.error('Token verification error:', error.message);
-        return res.status(401).json({
-            success: false,
-            message: 'Invalid or expired authentication token'
-        });
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'You are not logged in.',
+      });
     }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found.',
+      });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Session verification error:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error during session verification.',
+    });
+  }
 };
 
-// Admin-only middleware
+// Middleware: Requires user with role 'admin'
 const verifyTokenAndAdmin = async (req, res, next) => {
-    try {
-        // First verify token
-        await verifyToken(req, res, async () => {
-            // Now check role
-            if (req.user && req.user.role === 'admin') {
-                return next();
-            } else {
-                return res.status(403).json({
-                    success: false,
-                    message: 'Access denied. Admin privileges required.'
-                });
-            }
+  try {
+    await verifyToken(req, res, async () => {
+      if (req.user.role === 'admin') {
+        return next();
+      } else {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Admin privileges required.',
         });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: 'An error occurred during authorization'
-        });
-    }
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred during authorization.',
+    });
+  }
 };
-
 
 // Middleware: Requires user with role 'client'
 const verifyTokenAndClient = async (req, res, next) => {
-    await verifyToken(req, res, () => {
-        if (req.user.role === 'client') {
-            return next();
-        } else {
-            return res.status(403).json({
-                success: false,
-                message: 'Access denied. Client privileges required.'
-            });
-        }
+  try {
+    await verifyToken(req, res, async () => {
+      if (req.user.role === 'client') {
+        return next();
+      } else {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Client privileges required.',
+        });
+      }
     });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred during authorization.',
+    });
+  }
 };
 
 module.exports = {
-    verifyToken,
-    verifyTokenAndAdmin,
-    verifyTokenAndClient
+  verifyToken,
+  verifyTokenAndAdmin,
+  verifyTokenAndClient,
 };
+
+// This middleware checks if the user is logged in via session and has the required role.
+// It can be used to protect routes that require authentication and specific user roles.
+// It exports three middleware functions: verifyToken, verifyTokenAndAdmin, and verifyTokenAndClient.
+// These functions can be used in your route definitions to enforce authentication and authorization.
+// The verifyToken function checks if the user is logged in by verifying the session.
+// If the user is logged in, it retrieves the user from the database and attaches it to the request object.
+// The verifyTokenAndAdmin and verifyTokenAndClient functions extend the verifyToken function to check if the user has the required role.
+// If the user does not have the required role, it returns a 403 Forbidden response.
+// If the user is authenticated and has the required role, it calls the next middleware or route handler.
+// This code is typically used in a Node.js application that uses Express.js for routing and MongoDB for data storage.
+//     res.send('Welcome to the Real Estate API');
+// });
+//
