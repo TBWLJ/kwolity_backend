@@ -1,11 +1,13 @@
 const router = require('express').Router();
+const multer = require('multer');
 const { createProperty, getAllProperties, getPropertyById, updateProperty, deleteProperty, getPropertiesByStatus, getPropertiesByLocation, getPropertiesByPriceRange, getPropertiesByTitle, getPropertiesByUser, getPropertyCount } = require('../controller/propertyController');
 const { verifyToken, verifyTokenAndAdmin } = require('../middleware/verifyToken');
 
-
+const storage = multer.memoryStorage(); // Store files in memory buffer
+const upload = multer({ storage });
 
 // Property creation route (requires admin authentication)
-router.post('/', verifyTokenAndAdmin, createProperty);
+router.post('/', verifyTokenAndAdmin, upload.array('images', 10), createProperty);
 
 // Get all properties route
 router.get('/', getAllProperties);

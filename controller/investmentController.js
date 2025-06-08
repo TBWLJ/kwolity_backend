@@ -9,7 +9,7 @@ cloudinary.config({
 });
 
 const createInvestment = async (req, res) => {
-    const { title, description, goalAmount, expectedROI, type } = req.body;
+    const { title, description, goalAmount, currentAmount, expectedROI, status } = req.body;
     let images = req.body.images || [];
 
     try {
@@ -32,9 +32,10 @@ const createInvestment = async (req, res) => {
             title,
             description,
             goalAmount,
+            currentAmount,
             expectedROI,
-            type,
-            images
+            status: status || 'available', // Default status to 'available'
+            images: imageUrls,
         });
 
         // Save the investment to the database

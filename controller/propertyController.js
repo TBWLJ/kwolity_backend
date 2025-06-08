@@ -12,24 +12,23 @@ cloudinary.config({
 
 const createProperty = async (req, res) => {
     const { title, description, type, status, price, location } = req.body;
-    let images = req.body.images || [];
+    const files = req.files || [];
 
     try {
         let imageUrls = [];
 
-        // If images are provided, upload them to Cloudinary
-        if (images && images.length > 0) {
-            // images can be array of base64 strings or URLs
-            const uploadPromises = images.map(async (img) => {
-                const uploadResponse = await cloudinary.uploader.upload(img, {
-                    folder: 'properties'
-                });
-                return uploadResponse.secure_url;
-            });
+        // Upload each file buffer to Cloudinary
+        if (files.length > 0) {
+            const uploadPromises = files.map(file =>
+                cloudinary.uploader.upload_stream({ folder: 'properties' }, (error, result) => {
+                    if (error) throw error;
+                    return result.secure_url;
+                }).end(file.buffer)
+            );
+
             imageUrls = await Promise.all(uploadPromises);
         }
 
-        // Create a new property with Cloudinary image URLs
         const newProperty = new Property({
             title,
             description,
@@ -38,7 +37,7 @@ const createProperty = async (req, res) => {
             images: imageUrls,
             price,
             location,
-            createdBy: req.user ? req.user.id : undefined // optional: associate with user
+            createdBy: req.user ? req.user.id : undefined
         });
 
         await newProperty.save();
@@ -48,6 +47,7 @@ const createProperty = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 const getAllProperties = async (req, res) => {
     try {
