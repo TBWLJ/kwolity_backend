@@ -1,28 +1,53 @@
 const Property = require('../model/Property');
+const cloudinary = require('cloudinary').v2;
+
+// refractor the createProperty function to include uploading to cloudinary
+// and saving the image URLs in the database
+// Configure cloudinary (make sure to set your credentials in env variables)
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const createProperty = async (req, res) => {
-    const { title, description, type, status, images, price, location } = req.body;
+    const { title, description, type, status, price, location } = req.body;
+    let images = req.body.images || [];
 
     try {
-        // Create a new property
+        let imageUrls = [];
+
+        // If images are provided, upload them to Cloudinary
+        if (images && images.length > 0) {
+            // images can be array of base64 strings or URLs
+            const uploadPromises = images.map(async (img) => {
+                const uploadResponse = await cloudinary.uploader.upload(img, {
+                    folder: 'properties'
+                });
+                return uploadResponse.secure_url;
+            });
+            imageUrls = await Promise.all(uploadPromises);
+        }
+
+        // Create a new property with Cloudinary image URLs
         const newProperty = new Property({
             title,
             description,
             type,
             status,
-            images,
+            images: imageUrls,
             price,
-            location
+            location,
+            createdBy: req.user ? req.user.id : undefined // optional: associate with user
         });
 
-        // Save the property to the database
         await newProperty.save();
         res.status(201).json({ message: 'Property created successfully', property: newProperty });
     } catch (error) {
         console.error('Error creating property:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-}
+};
 
 const getAllProperties = async (req, res) => {
     try {

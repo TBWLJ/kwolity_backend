@@ -1,9 +1,32 @@
 const Investment = require('../model/Investment');
+const cloudinary = require('cloudinary').v2;
+
+// Configure cloudinary (make sure to set your credentials in env variables)
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const createInvestment = async (req, res) => {
-    const { title, description, goalAmount, expectedROI, type, images } = req.body;
+    const { title, description, goalAmount, expectedROI, type } = req.body;
+    let images = req.body.images || [];
 
     try {
+        let imageUrls = [];
+
+        // If images are provided, upload them to Cloudinary
+        if (images && images.length > 0) {
+            // images can be array of base64 strings or URLs
+            const uploadPromises = images.map(async (img) => {
+                const uploadResponse = await cloudinary.uploader.upload(img, {
+                    folder: 'investments'
+                });
+                return uploadResponse.secure_url;
+            });
+            imageUrls = await Promise.all(uploadPromises);
+        }
+
         // Create a new investment
         const newInvestment = new Investment({
             title,
