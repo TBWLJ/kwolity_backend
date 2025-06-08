@@ -50,8 +50,8 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true, // set to true if you're using HTTPS
-    sameSite: 'none'
+    secure: true, // only true in production HTTPS
+    sameSite: 'none', // must be 'none' for cross-site cookies
   }
 }));
 

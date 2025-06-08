@@ -40,41 +40,31 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Find the user by email
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+        return res.status(400).json({ message: 'Invalid email or password' });
         }
 
-        // Compare the password with the hashed password
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+        return res.status(400).json({ message: 'Invalid email or password' });
         }
 
-        // Exclude password from user data
+        // Save user ID in session
+        req.session.userId = user._id;
+
         const { password: _, ...userData } = user.toObject();
 
-        const token = jwt.sign(
-            { id: user._id, email: user.email, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none',
-            maxAge: 60 * 60 * 1000 // 1 hour
+        return res.status(200).json({
+        message: 'Login successful',
+        user: userData,
         });
+    } catch (error) {
+        console.error('Login error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
 
-        res.status(200).json({ message: 'Login successful', user: userData, token });
-    }
-    catch (error) {
-        console.error('Error logging in user:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-}
 
 const logout = (req, res) => {
     res.clearCookie('token');
