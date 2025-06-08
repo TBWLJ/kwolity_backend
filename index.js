@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const { connectDB } = require('./utils/db');
+const session = require('express-session');
 
 // Import routes
 const propertyRoute = require('./routes/propertyRoute');
@@ -21,10 +22,37 @@ const port = 3000;
 connectDB();
 
 // Middleware setup
-app.use(cors());
+// CORS Configuration
+const allowedOrigins = [
+    "http://localhost:3000",
+    "https://kwolitygroupltd.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (allowedOrigins.includes(origin) || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false, // set to true if you're using HTTPS
+    sameSite: 'lax'
+  }
+}));
 
 // Use routes
 app.use('/api/properties', propertyRoute);
