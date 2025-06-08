@@ -1,79 +1,78 @@
+// Middleware: Basic token verification
 const jwt = require("jsonwebtoken");
 const User = require('../model/User');
 
+// Reusable helper
+const getUserFromToken = async (token) => {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user) throw new Error('User not found');
+    return user;
+};
+
+// Middleware to verify token
 const verifyToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ 
+            return res.status(401).json({
                 success: false,
                 message: 'No authentication token provided'
             });
         }
 
         const token = authHeader.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SEC);
-        
-        const user = await User.findById(decoded.id);
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
-
-        req.user = user;
+        req.user = await getUserFromToken(token);
         next();
     } catch (error) {
-        res.status(401).json({
+        console.error('Token verification error:', error.message);
+        return res.status(401).json({
             success: false,
-            message: 'Invalid authentication token'
+            message: 'Invalid or expired authentication token'
         });
     }
 };
 
-const verifyTokenAndInvestor = async (req, res, next) => {
-    try {
-        await verifyToken(req, res, async () => {
-            if (req.user.investor) {
-                next();
-            } else {
-                res.status(403).json({
-                    success: false,
-                    message: 'Access denied. Coordinator privileges required.'
-                });
-            }
-        });
-    } catch (error) {
-        res.status(401).json({
-            success: false,
-            message: 'Authentication failed'
-        });
-    }
-};
-
+// Admin-only middleware
 const verifyTokenAndAdmin = async (req, res, next) => {
     try {
+        // First verify token
         await verifyToken(req, res, async () => {
-            if (req.user.admin) {
-                next();
+            // Now check role
+            if (req.user && req.user.role === 'admin') {
+                return next();
             } else {
-                res.status(403).json({
+                return res.status(403).json({
                     success: false,
                     message: 'Access denied. Admin privileges required.'
                 });
             }
         });
     } catch (error) {
-        res.status(401).json({
+        return res.status(500).json({
             success: false,
-            message: 'Authentication failed'
+            message: 'An error occurred during authorization'
         });
     }
 };
 
+
+// Middleware: Requires user with role 'client'
+const verifyTokenAndClient = async (req, res, next) => {
+    await verifyToken(req, res, () => {
+        if (req.user.role === 'client') {
+            return next();
+        } else {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. Client privileges required.'
+            });
+        }
+    });
+};
+
 module.exports = {
     verifyToken,
-    verifyTokenAndInvestor,
-    verifyTokenAndAdmin
+    verifyTokenAndAdmin,
+    verifyTokenAndClient
 };

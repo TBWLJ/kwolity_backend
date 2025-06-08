@@ -10,43 +10,48 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const createProperty = async (req, res) => {
-    const { title, description, type, status, price, location } = req.body;
-    const files = req.files || [];
-
-    try {
-        let imageUrls = [];
-
-        // Upload each file buffer to Cloudinary
-        if (files.length > 0) {
-            const uploadPromises = files.map(file =>
-                cloudinary.uploader.upload_stream({ folder: 'properties' }, (error, result) => {
-                    if (error) throw error;
-                    return result.secure_url;
-                }).end(file.buffer)
-            );
-
-            imageUrls = await Promise.all(uploadPromises);
-        }
-
-        const newProperty = new Property({
-            title,
-            description,
-            type,
-            status,
-            images: imageUrls,
-            price,
-            location,
-            createdBy: req.user ? req.user.id : undefined
-        });
-
-        await newProperty.save();
-        res.status(201).json({ message: 'Property created successfully', property: newProperty });
-    } catch (error) {
-        console.error('Error creating property:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
+const uploadToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'properties' },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url);
+      }
+    );
+    stream.end(fileBuffer);
+  });
 };
+
+const createProperty = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: 'No images uploaded' });
+    }
+
+    const uploadPromises = req.files.map(file => uploadToCloudinary(file.buffer));
+    const imageUrls = await Promise.all(uploadPromises);
+
+    const newProperty = new Property({
+      title: req.body.title,
+      description: req.body.description,
+      type: req.body.type,
+      status: req.body.status,
+      images: imageUrls,
+      price: req.body.price,
+      location: req.body.location,
+    });
+
+    await newProperty.save();
+
+    res.status(201).json({ message: 'Property created successfully', property: newProperty });
+  } catch (error) {
+    console.error('Error creating property:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
 
 
 const getAllProperties = async (req, res) => {

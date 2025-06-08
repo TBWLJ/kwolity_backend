@@ -7,7 +7,7 @@ const storage = multer.memoryStorage(); // Store files in memory buffer
 const upload = multer({ storage });
 
 // Property creation route (requires admin authentication)
-router.post('/', verifyTokenAndAdmin, upload.array('images', 10), createProperty);
+router.post('/create', verifyTokenAndAdmin, upload.array('images', 10), createProperty);
 
 // Get all properties route
 router.get('/', getAllProperties);
