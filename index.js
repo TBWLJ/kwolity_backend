@@ -51,7 +51,7 @@ app.use(session({
   cookie: {
     httpOnly: true,
     secure: true, // set to true if you're using HTTPS
-    sameSite: 'lax'
+    sameSite: 'none'
   }
 }));
 
