@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+// use userId as the unique identifier for the user instead of _id
+userSchema.virtual('userId').get(function() {
+    return this._id.toString();
+});
+
 const User = mongoose.model('User', userSchema);
 module.exports = User;
 // This code defines a Mongoose schema for a User model in a Node.js application.
