@@ -34,7 +34,7 @@ router.get('/price', getPropertiesByPriceRange);
 router.get('/title/:title', getPropertiesByTitle);
 
 // Get properties by user route
-router.get('/user/:userId', getPropertiesByUser);
+router.get('/user', getPropertiesByUser);
 
 // Get property count route
 router.get('/count', getPropertyCount);

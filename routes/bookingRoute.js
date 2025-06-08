@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const {createBooking, getAllBookings, getBookingById, updateBooking, deleteBooking} = require('../controller/bookingController');
+const {createBooking, getAllBookings, getBookingById, updateBooking, deleteBooking, getBookingsByUser} = require('../controller/bookingController');
 const { verifyToken, verifyTokenAndAdmin } = require('../middleware/verifyToken')
 
 // Create a new booking (requires authentication)
@@ -16,6 +16,9 @@ router.put('/:id', verifyTokenAndAdmin, updateBooking);
 
 // Delete booking by ID (requires admin authentication)
 router.delete('/:id', verifyTokenAndAdmin, deleteBooking);
+
+// Get bookings by user (requires authentication)
+router.get('/user', verifyToken, getBookingsByUser);
 
 
 // Export the router

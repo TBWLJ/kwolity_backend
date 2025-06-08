@@ -15,7 +15,7 @@ router.post('/logout', verifyToken, logout);
 router.get('/profile', verifyToken, getUserProfile);
 
 // User profile update route (requires authentication)
-router.put('/profile/:userId', verifyToken, updateUserProfile);
+router.put('/profile', verifyToken, updateUserProfile);
 
 
 // Export the router

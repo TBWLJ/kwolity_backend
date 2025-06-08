@@ -18,7 +18,7 @@ router.put('/:id', verifyTokenAndAdmin, updateInvestment);
 router.delete('/:id', verifyTokenAndAdmin, deleteInvestment);
 
 // Get investments by user route
-router.get('/user/:userId', verifyToken, getInvestmentsByUser);
+router.get('/user', verifyToken, getInvestmentsByUser);
 
 // Get investment count route
 router.get('/count', getInvestmentCount);
