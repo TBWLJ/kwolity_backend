@@ -226,7 +226,6 @@ const getPropertyCount = async (req, res) => {
     }
 }
 
-// give comments on the code
 // This code defines a set of controller functions for managing properties in a real estate application.
 // Each function handles a specific operation related to properties, such as creating, fetching, updating, and deleting properties.
 // The functions interact with a MongoDB database using Mongoose, a popular ODM (Object Data Modeling) library for Node.js.
