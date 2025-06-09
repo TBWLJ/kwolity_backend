@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    savedProperties: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Property' }],
     createdAt: {
         type: Date,
         default: Date.now

@@ -192,24 +192,26 @@ const getPropertiesByTitle = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
 const getPropertiesByUser = async (req, res) => {
-    const userId = req.session.userId;
+  const userId = req.session.userId;
 
-    if (!userId) {
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
+  if (!userId) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 
-    try {
-        const properties = await Property.find({ createdBy: userId });
-        if (properties.length === 0) {
-        return res.status(404).json({ message: 'No properties found for this user' });
-        }
-        res.status(200).json(properties);
-    } catch (error) {
-        console.error('Error fetching properties by user:', error);
-        res.status(500).json({ message: 'Internal server error' });
+  try {
+    const user = await User.findById(userId).populate('savedProperties');
+    if (!user || !user.savedProperties.length) {
+      return res.status(404).json({ message: 'No saved properties found for this user' });
     }
+    res.status(200).json(user.savedProperties);
+  } catch (error) {
+    console.error('Error fetching saved properties:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 };
+
 
 const getPropertyCount = async (req, res) => {
     try {
