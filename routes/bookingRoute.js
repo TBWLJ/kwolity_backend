@@ -5,6 +5,9 @@ const { verifyToken, verifyTokenAndAdmin } = require('../middleware/verifyToken'
 // Create a new booking (requires authentication)
 router.post('/', verifyToken, createBooking);
 
+// Get bookings by user (requires authentication)
+router.get('/user', verifyToken, getBookingsByUser);
+
 // Get all bookings (requires admin authentication)
 router.get('/', verifyTokenAndAdmin, getAllBookings);
 
@@ -17,8 +20,6 @@ router.put('/:id', verifyTokenAndAdmin, updateBooking);
 // Delete booking by ID (requires admin authentication)
 router.delete('/:id', verifyTokenAndAdmin, deleteBooking);
 
-// Get bookings by user (requires authentication)
-router.get('/user', verifyToken, getBookingsByUser);
 
 
 // Export the router

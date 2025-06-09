@@ -8,6 +8,9 @@ router.post('/', verifyTokenAndAdmin, createInvestment);
 // Get all investments route
 router.get('/', getAllInvestments);
 
+// Get investments by user route
+router.get('/user', verifyToken, getInvestmentsByUser);
+
 // Get investment by ID route
 router.get('/:id', getInvestmentById);
 
@@ -17,8 +20,6 @@ router.put('/:id', verifyTokenAndAdmin, updateInvestment);
 // Delete investment by ID route (requires admin authentication)
 router.delete('/:id', verifyTokenAndAdmin, deleteInvestment);
 
-// Get investments by user route
-router.get('/user', verifyToken, getInvestmentsByUser);
 
 // Get investment count route
 router.get('/count', getInvestmentCount);
