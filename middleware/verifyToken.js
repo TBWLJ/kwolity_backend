@@ -75,7 +75,6 @@
 // };
 
 const User = require('../model/User');
-const jwt = require('jsonwebtoken');
 
 
 // Middleware to check if user is authenticated
