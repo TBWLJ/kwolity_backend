@@ -79,27 +79,19 @@ const jwt = require('jsonwebtoken');
 
 
 // Middleware to check if user is authenticated
- const verifyToken = (req, res, next) => {
-   const token = req.cookies.token;
-   if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-   try {
-     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-     req.user = decoded;
-     next();
-   } catch (error) {
-     res.status(401).json({ message: "Invalid token" });
-   }
+const verifyToken = (req, res, next) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  req.user = { id: req.session.userId };
+  next();
 };
 
-
-
-// // Middleware to check if user is admin
 const verifyTokenAndAdmin = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.userId);
-    if (!user || user.role !== "admin") {
-      return res.status(403).json({ message: "Access denied. Admins only." });
+    const user = await User.findById(req.session.userId);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Admins only.' });
     }
     next();
   } catch (error) {
@@ -107,11 +99,11 @@ const verifyTokenAndAdmin = async (req, res, next) => {
   }
 };
 
+
   
 module.exports = {
   verifyToken,
   verifyTokenAndAdmin,
-  // verifyTokenAndClient, // Uncomment if you want to use client verification
 };
 
 // module.exports = {

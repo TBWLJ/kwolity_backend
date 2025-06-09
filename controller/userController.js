@@ -38,78 +38,57 @@ const registerUser = async (req, res) => {
 
 //controller function for user login
 const loginUser = async (req, res) => {
-    
-    const {email, password} = req.body;
+    const { email, password } = req.body;
     try {
-        // Check if all fields are filled
         if (!email || !password) {
-            return res.status(400).json({success:false, message: 'All fields are required'});
+            return res.status(400).json({ success: false, message: 'All fields are required' });
         }
 
-        // Check if email exists
-        const user = await User.findOne({email}).select('+password');
-
-        // If user does not exist, return error
+        const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({success:false, message: 'Invalid email'});
+            return res.status(400).json({ success: false, message: 'Invalid email' });
         }
-        // Check if password is correct
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-           return res.status(400).json({success:false, message: 'Incorrect password'});
+            return res.status(400).json({ success: false, message: 'Incorrect password' });
         }
-         
-        // Create token
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, 
-            {expiresIn: '1d'});
-            // Send token in cookie
-            res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production'? 
-            'none' : 'strict',
-            maxAge: 24 * 60 * 60 * 1000
-        });
 
-        return res.status(200).json({success:true, message: 'Login successful'});
+        // Store user ID in session
+        req.session.userId = user._id;
 
+        return res.status(200).json({ success: true, message: 'Login successful' });
     } catch (error) {
-        res.status(500).json({success:false,message: 'Server error'});
+        res.status(500).json({ success: false, message: 'Server error' });
     }
-}   
+};
 
 
 const logout = (req, res) => {
-        try {
-        res.clearCookie('token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production'? 
-            'none' : 'strict',
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Could not log out.' });
+        }
+        res.clearCookie('connect.sid'); // name used by express-session
+        res.status(200).json({ message: 'Logout successful' });
     });
-        return res.status(200).json({success:true,message: 'Logged out'});
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({success:false, message: 'Server error'});
-        
-    }
-}
+};
+
 
 const getUserProfile = async (req, res) => {
-    const userId = req.user.id; // Assuming user ID is stored in req.user after authentication
+    const userId = req.user.id;
 
     try {
-        const user = await User.findById(userId).select('-password'); // Exclude password from the response
+        const user = await User.findById(userId).select('-password');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
         res.status(200).json(user);
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error fetching user profile:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-}
+};
 
 // update user profile
 const updateUserProfile = async (req, res) => {

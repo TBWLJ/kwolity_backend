@@ -24,22 +24,20 @@ connectDB();
 // Middleware setup
 // CORS Configuration
 const allowedOrigins = [
-    "http://localhost:3000",
-    "https://kwolitygroupltd.vercel.app",
+  "http://localhost:3000",
+  "https://kwolitygroupltd.vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (allowedOrigins.includes(origin) || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true, 
-  })
-);
+app.use(cors({
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // allow session cookies
+}));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -50,8 +48,9 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true, // only true in production HTTPS
-    sameSite: 'none', // must be 'none' for cross-site cookies
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
   }
 }));
 
