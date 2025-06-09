@@ -108,7 +108,11 @@ const verifyTokenAndAdmin = async (req, res, next) => {
 };
 
   
-export default {verifyToken, verifyTokenAndAdmin};
+module.exports = {
+  verifyToken,
+  verifyTokenAndAdmin,
+  // verifyTokenAndClient, // Uncomment if you want to use client verification
+};
 
 // module.exports = {
 //   verifyToken,
