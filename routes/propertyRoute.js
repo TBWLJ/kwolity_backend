@@ -12,6 +12,9 @@ router.post('/create', verifyTokenAndAdmin, upload.array('images', 10), createPr
 // Get all properties route
 router.get('/', getAllProperties);
 
+// Get properties by user route
+router.get('/user-properties', verifyToken, getPropertiesByUser);
+
 // Get property by ID route
 router.get('/:id', getPropertyById);
 
@@ -33,8 +36,6 @@ router.get('/price', getPropertiesByPriceRange);
 // Get properties by title route
 router.get('/title/:title', getPropertiesByTitle);
 
-// Get properties by user route
-router.get('/user', verifyToken, getPropertiesByUser);
 
 // Get property count route
 router.get('/count', getPropertyCount);
