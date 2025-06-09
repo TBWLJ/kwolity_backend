@@ -103,51 +103,59 @@ const deleteInvestment = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
 const investInProperty = async (req, res) => {
     const { id } = req.params;
-    const { userId, amount } = req.body;
+    const userId = req.session.userId;
+    const { amount } = req.body;
+
+    if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
 
     try {
-        // Find the investment by ID
         const investment = await Investment.findById(id);
         if (!investment) {
             return res.status(404).json({ message: 'Investment not found' });
         }
 
-        // Check if the investment is still open for funding
         if (investment.status !== 'investing') {
             return res.status(400).json({ message: 'Investment is not open for funding' });
         }
 
-        // Update the current amount and add the investor
         investment.currentAmount += amount;
-        investment.investors.push(userId);
+        if (!investment.investors.includes(userId)) {
+            investment.investors.push(userId);
+        }
 
-        // Check if the goal amount has been reached
         if (investment.currentAmount >= investment.goalAmount) {
             investment.status = 'funded';
         }
 
-        // Save the updated investment
         await investment.save();
         res.status(200).json({ message: 'Investment successful', investment });
     } catch (error) {
         console.error('Error investing in property:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-}
+};
+
 const getInvestmentsByUser = async (req, res) => {
-    const userId = req.user.id; // Assuming user ID is stored in req.user after authentication
+    const userId = req.session.userId;
+
+    if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
 
     try {
-        // Fetch investments made by the user
         const investments = await Investment.find({ investors: userId });
         res.status(200).json(investments);
     } catch (error) {
         console.error('Error fetching user investments:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-}
+};
+
 
 //  get investment count
 const getInvestmentCount = async (req, res) => {
