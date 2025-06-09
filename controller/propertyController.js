@@ -195,7 +195,7 @@ const getPropertiesByTitle = async (req, res) => {
 }
 
 const getPropertiesByUser = async (req, res) => {
-  const userId = req.user?.id; // if using JWT-based auth
+  const userId = req.session.id;
 
   if (!userId) {
     return res.status(401).json({ message: 'Unauthorized' });

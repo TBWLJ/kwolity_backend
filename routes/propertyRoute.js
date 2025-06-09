@@ -25,7 +25,7 @@ router.post('/create', verifyTokenAndAdmin, upload.array('images', 10), createPr
 router.get('/', getAllProperties);
 
 // Get properties by user route
-router.get('/user-properties', verifyToken, getPropertiesByUser);
+router.get('/user', verifyToken, getPropertiesByUser);
 
 // Get properties by status route
 router.get('/status/:status', getPropertiesByStatus);
