@@ -37,7 +37,7 @@ const registerUser = async (req, res) => {
 }
 
 //controller function for user login
-const login = async (req, res) => {
+const loginUser = async (req, res) => {
     
     const {email, password} = req.body;
     try {
