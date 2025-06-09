@@ -37,7 +37,7 @@ const registerUser = async (req, res) => {
 }
 
 //controller function for user login
-export const login = async (req, res) => {
+const login = async (req, res) => {
     
     const {email, password} = req.body;
     try {
@@ -79,7 +79,7 @@ export const login = async (req, res) => {
 }   
 
 
-export const logout = (req, res) => {
+const logout = (req, res) => {
         try {
         res.clearCookie('token', {
             httpOnly: true,
