@@ -53,18 +53,8 @@ const loginUser = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ success: false, message: 'Incorrect password' });
         }
-
-        // Store user ID in session
-        req.session.userId = user._id;
-
-        return res.status(200).json({ success: true, message: 'Login successful' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-};
-
-
-const logout = (req, res) => {
+// ✅ Store user in session
+req.session.userId = user._id;
     req.session.destroy((err) => {
         if (err) {
             return res.status(500).json({ message: 'Could not log out.' });

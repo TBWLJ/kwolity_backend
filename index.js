@@ -13,11 +13,13 @@ const paymentRoute = require('./routes/paymentRoute');
 const investmentRoute = require('./routes/investmentRoute');
 
 
+
 // Initialize the Express application
 const app = express();
 dotenv.config();
 const port = 3000;
 
+app.set('trust proxy', 1); // Trust the first proxy
 // Database connection
 connectDB();
 
@@ -48,11 +50,12 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
-  }
+    secure: true, // on HTTPS
+    sameSite: 'none',
+    maxAge: 24 * 60 * 60 * 1000,
+  },
 }));
+
 
 // Use routes
 app.use('/api/properties', propertyRoute);
