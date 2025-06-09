@@ -75,6 +75,8 @@
 // };
 
 import jwt from 'jsonwebtoken';
+const User = require('../model/User');
+
 
 // Middleware to check if user is authenticated
  const verifyToken = (req, res, next) => {
@@ -93,10 +95,6 @@ import jwt from 'jsonwebtoken';
 
 
 // // Middleware to check if user is admin
-import User from "../models/User.js";
-
-
-
 const verifyTokenAndAdmin = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.userId);
