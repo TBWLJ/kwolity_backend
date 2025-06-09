@@ -202,10 +202,7 @@ const getPropertiesByUser = async (req, res) => {
   }
 
   try {
-    const user = await User.findById(userId).populate('savedProperties');
-    if (!user || !user.savedProperties.length) {
-      return res.status(404).json({ message: 'No saved properties found for this user' });
-    }
+    const user = await User.findById(userId);
     res.status(200).json(user.savedProperties);
   } catch (error) {
     console.error('Error fetching saved properties:', error);
