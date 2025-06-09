@@ -1,5 +1,6 @@
 const Property = require('../model/Property');
 const cloudinary = require('cloudinary').v2;
+const User = require('../model/User');
 
 // refractor the createProperty function to include uploading to cloudinary
 // and saving the image URLs in the database
