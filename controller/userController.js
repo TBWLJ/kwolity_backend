@@ -36,39 +36,63 @@ const registerUser = async (req, res) => {
     }
 }
 
-const loginUser = async (req, res) => {
-    const { email, password } = req.body;
-
+//controller function for user login
+export const login = async (req, res) => {
+    
+    const {email, password} = req.body;
     try {
-        const user = await User.findOne({ email });
+        // Check if all fields are filled
+        if (!email || !password) {
+            return res.status(400).json({success:false, message: 'All fields are required'});
+        }
+
+        // Check if email exists
+        const user = await User.findOne({email}).select('+password');
+
+        // If user does not exist, return error
         if (!user) {
-        return res.status(400).json({ message: 'Invalid email or password' });
+            return res.status(400).json({success:false, message: 'Invalid email'});
         }
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-        return res.status(400).json({ message: 'Invalid email or password' });
+        // Check if password is correct
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+           return res.status(400).json({success:false, message: 'Incorrect password'});
         }
-
-        // Save user ID in session
-        req.session.userId = user._id;
-
-        const { password: _, ...userData } = user.toObject();
-
-        return res.status(200).json({
-        message: 'Login successful',
-        user: userData,
+         
+        // Create token
+        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, 
+            {expiresIn: '1d'});
+            // Send token in cookie
+            res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production'? 
+            'none' : 'strict',
+            maxAge: 24 * 60 * 60 * 1000
         });
+
+        return res.status(200).json({success:true, message: 'Login successful'});
+
     } catch (error) {
-        console.error('Login error:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({success:false,message: 'Server error'});
     }
-};
+}   
 
 
-const logout = (req, res) => {
-    res.clearCookie('token');
-    res.status(200).json({ message: 'Logout successful' });
+export const logout = (req, res) => {
+        try {
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production'? 
+            'none' : 'strict',
+    });
+        return res.status(200).json({success:true,message: 'Logged out'});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({success:false, message: 'Server error'});
+        
+    }
 }
 
 const getUserProfile = async (req, res) => {
