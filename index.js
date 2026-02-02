@@ -28,6 +28,7 @@ connectDB();
 const allowedOrigins = [
   "http://localhost:3000",
   "https://kwolitygroupltd.vercel.app",
+  "https://kwolitygroupltd.com.ng"
 ];
 
 app.use(cors({

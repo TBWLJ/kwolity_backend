@@ -2,9 +2,6 @@ const Property = require('../model/Property');
 const cloudinary = require('cloudinary').v2;
 const User = require('../model/User');
 
-// refractor the createProperty function to include uploading to cloudinary
-// and saving the image URLs in the database
-// Configure cloudinary (make sure to set your credentials in env variables)
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -52,12 +49,8 @@ const createProperty = async (req, res) => {
   }
 };
 
-
-
-
 const getAllProperties = async (req, res) => {
     try {
-        // Fetch all properties from the database
         const properties = await Property.find();
         res.status(200).json(properties);
     } catch (error) {

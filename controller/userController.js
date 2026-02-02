@@ -22,7 +22,7 @@ const registerUser = async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            role: role || 'client', // Default to 'client' if no role is provided
+            role: role || 'tenant',
             phone
         });
 
@@ -31,9 +31,15 @@ const registerUser = async (req, res) => {
         res.status(201).json({ message: 'User registered successfully', user: newUser });
     }
     catch (error) {
-        console.error('Error registering user:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
+}
+
+const cookieConfig = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    path: "/",
 }
 
 //controller function for user login
@@ -54,26 +60,69 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Incorrect password' });
         }
 
-        // Store user ID in session
-        req.session.userId = user._id;
+        const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
+            expiresIn: "15m"
+        });
 
-        return res.status(200).json({ success: true, message: 'Login successful' });
+        const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_REFRESH_SECRET, {
+            expiresIn: "7d",
+        });
+
+        // Set cookies consistently
+        res.cookie("token", token, { ...cookieConfig, maxAge: 15 * 60 * 1000 });
+        res.cookie("refreshToken", refreshToken, { ...cookieConfig, maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+        // send OTP
+        // await sendOTP(email);
+
+        res.status(200).json({
+            user: {
+                userId: user._id,
+                name: user.name,
+                role: user.role,
+                plan: user.plan,
+            },
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
 
+const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies;
 
-const logout = (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).json({ message: 'Could not log out.' });
-        }
-        res.clearCookie('connect.sid'); // name used by express-session
-        res.status(200).json({ message: 'Logout successful' });
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No refresh token provided" });
+    }
+
+    const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    if (!payload) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+
+    const token = jwt.sign({ userId: payload.userId }, process.env.JWT_SECRET, {
+      expiresIn: "15m",
     });
+
+    const newRefresh = jwt.sign({ userId: payload.userId }, process.env.JWT_REFRESH_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("token", token, { ...cookieConfig, maxAge: 15 * 60 * 1000 });
+    res.cookie("refreshToken", newRefresh, { ...cookieConfig, maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+    res.status(200).json({ token, refreshToken: newRefresh });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
+const logout = (req, res) => {
+  res.clearCookie("token", cookieConfig);
+  res.clearCookie("refreshToken", cookieConfig);
+  res.status(200).json({ message: "Logged out successfully" });
+};
 
 // Get user profile
 const getUserProfile = async (req, res) => {
@@ -158,28 +207,9 @@ const saveProperty = async (req, res) => {
 module.exports = {
     registerUser,
     loginUser,
+    refreshToken,
     logout,
     getUserProfile,
     updateUserProfile,
-    saveProperty
+    saveProperty,
 };
-
-// This code defines user-related operations such as registration, login, logout, and fetching user profiles.
-// It uses Express.js for routing, Mongoose for MongoDB interactions, and bcrypt for password hashing.
-// The `register` function checks if a user already exists, hashes the password, and saves the new user.
-// The `login` function verifies the user's credentials, generates a JWT token, and sets it as a cookie.
-// The `logout` function clears the token cookie, and the `getUserProfile` function retrieves the user's profile excluding the password.
-// The code handles errors gracefully and returns appropriate HTTP status codes and messages.
-// This code is typically used in a Node.js application that uses MongoDB as its database.
-// It is essential for building user authentication and management features in a web application.
-// It ensures that user data is stored in a structured way, making it easier to query and manipulate.
-// The use of Mongoose allows for validation and type checking, ensuring data integrity.
-// This code is typically placed in a separate file (e.g., controller/user.js) to keep the code organized.
-// It can be used in conjunction with other parts of the application, such as routes and middleware,
-// to handle user-related operations like registration, login, and profile management.
-// The User model can be used to create, read, update, and delete user documents in the MongoDB database.
-// This code is essential for building user authentication and management features in a web application.
-// The use of Mongoose allows for validation and type checking, ensuring data integrity.
-// This code is typically placed in a separate file (e.g., controller/user.js) to keep the code organized.
-// It can be used in conjunction with other parts of the application, such as routes and middleware,
-// to handle user-related operations like registration, login, and profile management.
