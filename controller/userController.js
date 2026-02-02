@@ -82,6 +82,10 @@ const loginUser = async (req, res) => {
                 role: user.role,
                 plan: user.plan,
             },
+            token,
+            refreshToken,
+            success: true,
+            message: 'Login successful'
         });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });
