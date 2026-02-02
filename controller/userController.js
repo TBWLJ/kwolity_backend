@@ -36,11 +36,11 @@ const registerUser = async (req, res) => {
 }
 
 const cookieConfig = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    path: "/",
-}
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+};
 
 //controller function for user login
 const loginUser = async (req, res) => {
