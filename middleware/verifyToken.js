@@ -75,16 +75,21 @@
 // };
 
 const User = require('../model/User');
+const jwt = require('jsonwebtoken');
 
-
-// Middleware to check if user is authenticated
 const verifyToken = (req, res, next) => {
-  if (!req.session.userId) {
-    return res.status(401).json({ message: 'Unauthorized' });
+  const token = req.cookies.token; // get JWT from cookie
+  if (!token) return res.status(401).json({ message: 'Unauthorized' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { id: decoded.userId, role: decoded.role };
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Invalid token' });
   }
-  req.user = { id: req.session.userId };
-  next();
 };
+
 
 const verifyTokenAndAdmin = async (req, res, next) => {
   try {
