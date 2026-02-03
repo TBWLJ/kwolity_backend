@@ -21,7 +21,7 @@ connectDB();
 // CORS
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://kwolitygroupltd.com.ng"
+  "https://kwolitygroupltd.com.ng",
   "https://admin.kwolitygroupltd.com.ng",
 ];
 
