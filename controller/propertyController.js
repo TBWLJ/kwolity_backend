@@ -171,7 +171,7 @@ const getPropertiesByUser = async (req, res) => {
     const user = await User.findById(req.user.id).populate('savedProperties');
     if (!user) return res.status(404).json({ message: 'User not found' });
     if (!user.savedProperties || user.savedProperties.length === 0) {
-      return res.status(404).json({ message: 'No saved properties found for this user' });
+      return res.status(200).json({ message: 'No saved properties found for this user' });
     }
     res.status(200).json(user.savedProperties);
   } catch (error) {
