@@ -9,10 +9,11 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Upload buffer to Cloudinary
 const uploadToCloudinary = (fileBuffer) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: 'properties' },
+      { folder: "properties" },
       (error, result) => {
         if (error) return reject(error);
         resolve(result.secure_url);
@@ -22,35 +23,97 @@ const uploadToCloudinary = (fileBuffer) => {
   });
 };
 
-// Create a new property
+// Slug generator
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+};
+
+// Ensure slug is unique
+const generateUniqueSlug = async (title) => {
+  let baseSlug = slugify(title);
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (await Property.exists({ slug })) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+
+  return slug;
+};
+
+// Create Property Controller
 const createProperty = async (req, res) => {
   try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: 'No images uploaded' });
+    const {
+      title,
+      description,
+      type,
+      status,
+      price,
+      location,
+    } = req.body;
+
+    // Validate required fields
+    if (!title || !description || !type || !status || !price || !location) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
 
-    const uploadPromises = req.files.map(file => uploadToCloudinary(file.buffer));
+    // Validate images
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one image is required",
+      });
+    }
+
+    // Upload images
+    const uploadPromises = req.files.map((file) =>
+      uploadToCloudinary(file.buffer)
+    );
+
     const imageUrls = await Promise.all(uploadPromises);
 
-    const newProperty = new Property({
-      title: req.body.title,
-      description: req.body.description,
-      type: req.body.type,
-      status: req.body.status,
+    // Generate unique slug
+    const slug = await generateUniqueSlug(title);
+
+    // Create property
+    const property = await Property.create({
+      title,
+      slug,
+      description,
+      type,
+      status,
       images: imageUrls,
-      price: req.body.price,
-      location: req.body.location,
-      createdBy: req.user.id, // track property owner
+      price,
+      location,
     });
 
-    await newProperty.save();
-
-    res.status(201).json({ message: 'Property created successfully', property: newProperty });
+    return res.status(201).json({
+      success: true,
+      message: "Property created successfully",
+      data: property,
+    });
   } catch (error) {
-    console.error('Error creating property:', error.message);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Create property error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create property",
+      error: error.message,
+    });
   }
 };
+
 
 // Fetch all properties
 const getAllProperties = async (req, res) => {
