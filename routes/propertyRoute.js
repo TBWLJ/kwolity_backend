@@ -46,9 +46,9 @@ router.get('/count', getPropertyCount);
 router.get('/:id', getPropertyById);
 
 // Update property by ID route (requires admin authentication)
-router.put('/:id', verifyTokenAndAdmin, updateProperty);
+router.put('/:id', verifyToken, verifyTokenAndAdmin, updateProperty);
 
 // Delete property by ID route (requires admin authentication)
-router.delete('/:id', verifyTokenAndAdmin, deleteProperty);
+router.delete('/:id', verifyToken, verifyTokenAndAdmin, deleteProperty);
 
 module.exports = router;
