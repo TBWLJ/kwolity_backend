@@ -10,7 +10,7 @@ const verifyToken = async (req, res, next) => {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
 
     // Attach user info to req.user
-    req.user = { id: payload.userId, role: payload.role };
+    req.user = { _id: payload.userId, role: payload.role };
     next();
   } catch (err) {
     console.error('JWT verification error:', err.message);
