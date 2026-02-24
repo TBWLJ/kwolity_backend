@@ -37,8 +37,9 @@ const registerUser = async (req, res) => {
 
 const cookieConfig = {
   httpOnly: true,
-  secure: true,
-  sameSite: "none",
+  secure: true,          // required on HTTPS
+  sameSite: "lax",       // IMPORTANT: use "lax" for same-site subdomains
+  domain: ".kwolitygroupltd.com.ng", // share across subdomains
   path: "/",
 };
 
